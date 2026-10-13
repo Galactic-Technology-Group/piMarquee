@@ -1,0 +1,10 @@
+node_modules/
+dist/
+*.log
+.env
+config/config.json
+config/config.json.bak
+.dev/
+go2rtc/go2rtc.exe
+go2rtc/go2rtc
+go2rtc/*.zip

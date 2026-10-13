@@ -1,0 +1,22 @@
+[Unit]
+Description=go2rtc camera streaming server (pimarquee)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pimarquee
+Group=pimarquee
+ExecStart=/usr/local/bin/go2rtc -config /etc/go2rtc/go2rtc.yaml
+WorkingDirectory=/etc/go2rtc
+Restart=always
+RestartSec=3
+Nice=-5
+# go2rtc only needs network + its config; lock the rest down.
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

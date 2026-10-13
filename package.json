@@ -1,0 +1,29 @@
+{
+  "name": "pimarquee",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Raspberry Pi digital signage: RTSP cameras, web pages, text and clock widgets with a web admin UI",
+  "license": "MIT",
+  "workspaces": [
+    "packages/shared",
+    "packages/server",
+    "packages/display",
+    "packages/admin"
+  ],
+  "scripts": {
+    "build": "npm run build -w @pimarquee/shared && npm run build -w @pimarquee/display && npm run build -w @pimarquee/admin && npm run build -w @pimarquee/server",
+    "dev": "concurrently -k -n server,admin,display -c blue,green,magenta \"npm run dev -w @pimarquee/server\" \"npm run dev -w @pimarquee/admin\" \"npm run dev -w @pimarquee/display\"",
+    "start": "node packages/server/dist/index.js",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "rimraf packages/*/dist"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

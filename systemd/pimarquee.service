@@ -1,0 +1,21 @@
+[Unit]
+Description=pimarquee server (API, admin UI, display page)
+After=network-online.target go2rtc.service
+Wants=network-online.target go2rtc.service
+
+[Service]
+Type=simple
+User=pimarquee
+Group=pimarquee
+EnvironmentFile=/etc/pimarquee/env
+# Lets the backend find the kiosk's Wayland socket for display power control.
+Environment=XDG_RUNTIME_DIR=/run/user/%U
+WorkingDirectory=/opt/pimarquee
+ExecStart=/usr/bin/node /opt/pimarquee/packages/server/dist/index.js
+Restart=always
+RestartSec=3
+KillSignal=SIGTERM
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target

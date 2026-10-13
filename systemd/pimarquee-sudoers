@@ -1,0 +1,3 @@
+# Allow the pimarquee service user to restart its own units and reboot the Pi.
+# Installed to /etc/sudoers.d/pimarquee by scripts/install.sh
+pimarquee ALL=(root) NOPASSWD: /bin/systemctl restart pimarquee-kiosk.service, /bin/systemctl restart go2rtc.service, /bin/systemctl restart pimarquee.service, /sbin/reboot

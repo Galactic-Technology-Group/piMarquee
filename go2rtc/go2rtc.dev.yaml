@@ -1,0 +1,23 @@
+# Local development config for go2rtc (Windows/macOS/Linux dev box).
+# Start with: .\scripts\dev-go2rtc.ps1   (or: go2rtc -config go2rtc/go2rtc.dev.yaml)
+#
+# Note: go2rtc writes streams added through its API back into this file, so cam_<id> entries may
+# appear here after you add cameras in the admin UI. That is harmless; the server re-syncs on start.
+api:
+  listen: ":1984"
+  origin: "*"
+
+webrtc:
+  listen: ":8555"
+  candidates:
+    - stun:8555
+
+rtsp:
+  listen: ""
+
+log:
+  level: debug
+
+streams: {}
+# Camera-less smoke test: install ffmpeg (winget install Gyan.FFmpeg) and add a camera in the
+# admin UI whose "RTSP URL" is:   ffmpeg:virtual?video&size=1280x720&decimals=2#video=h264

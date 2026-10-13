@@ -1,0 +1,32 @@
+[Unit]
+Description=pimarquee kiosk (cage + Chromium on tty1)
+After=pimarquee.service systemd-user-sessions.service plymouth-quit-wait.service
+Wants=pimarquee.service
+Conflicts=getty@tty1.service
+
+[Service]
+Type=simple
+User=pimarquee
+Group=pimarquee
+# A real logind seat session so cage can open DRM + input devices without root.
+PAMName=login
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+TTYVTDisallocate=yes
+StandardInput=tty-fail
+StandardOutput=journal
+StandardError=journal
+UtmpIdentifier=tty1
+UtmpMode=user
+Environment=XDG_SESSION_TYPE=wayland
+# Let cage start even with no keyboard or mouse plugged in.
+Environment=WLR_LIBINPUT_NO_DEVICES=1
+EnvironmentFile=/etc/pimarquee/env
+ExecStartPre=/usr/local/bin/pimarquee-wait-for-http http://127.0.0.1:${PORT}/health 90
+ExecStart=/usr/bin/cage -d -- /usr/local/bin/pimarquee-kiosk
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=graphical.target

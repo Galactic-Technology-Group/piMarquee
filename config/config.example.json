@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "settings": {
+    "port": 8080,
+    "displayName": "Pi Display",
+    "canvas": { "aspect": "16:9", "width": 1920, "height": 1080 },
+    "timezone": "UTC",
+    "locale": "en-US",
+    "maxStreamsOverride": null,
+    "defaultStreamMode": "webrtc",
+    "displayPowerMethod": "auto",
+    "go2rtc": { "externalPort": 1984 },
+    "autoReloadHours": 0,
+    "mqtt": {
+      "enabled": false,
+      "url": "mqtt://homeassistant.local:1883",
+      "username": "",
+      "password": "",
+      "baseTopic": "pimarquee",
+      "discoveryPrefix": "homeassistant"
+    }
+  },
+  "cameras": [],
+  "layouts": [
+    {
+      "id": "default000",
+      "name": "Default",
+      "background": "#000000",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z",
+      "widgets": [
+        {
+          "id": "clock00000",
+          "type": "clock",
+          "name": "Clock",
+          "rect": { "x": 5, "y": 8, "w": 90, "h": 30 },
+          "z": 0,
+          "opacity": 1,
+          "visible": true,
+          "background": "transparent",
+          "borderRadius": 0,
+          "showTime": true,
+          "showDate": true,
+          "showSeconds": true,
+          "hour12": true,
+          "dateFormat": "long",
+          "timezone": null,
+          "locale": null,
+          "fontFamily": "system-ui",
+          "fontSize": 14,
+          "color": "#ffffff",
+          "align": "center"
+        },
+        {
+          "id": "welcome000",
+          "type": "text",
+          "name": "Welcome",
+          "rect": { "x": 10, "y": 48, "w": 80, "h": 40 },
+          "z": 0,
+          "opacity": 1,
+          "visible": true,
+          "background": "transparent",
+          "borderRadius": 0,
+          "content": "Welcome to piMarquee\n\nOpen http://<pi-ip>:8080/ from another device to configure this display.",
+          "fontFamily": "system-ui",
+          "fontSize": 4,
+          "color": "#cfd8dc",
+          "align": "center",
+          "valign": "middle",
+          "bold": false,
+          "italic": false,
+          "padding": 1
+        }
+      ]
+    }
+  ],
+  "display": { "activeLayoutId": "default000", "power": "on" },
+  "auth": { "passwordHash": null, "tokens": [] }
+}
