@@ -28,8 +28,8 @@ can be switched from the admin UI, the REST API, Home Assistant (MQTT) or a futu
 
 ```bash
 sudo apt-get install -y git
-git clone https://github.com/<you>/pimarquee.git
-cd pimarquee
+git clone https://github.com/Galactic-Technology-Group/piMarquee.git
+cd piMarquee
 sudo ./scripts/install.sh
 ```
 
