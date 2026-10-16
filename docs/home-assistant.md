@@ -87,8 +87,55 @@ Layout and widget ids are visible in the admin UI URLs and in `GET /api/v1/widge
 
 ## Showing Home Assistant *on* the display
 
-Add a **Web page** widget with a dashboard URL in kiosk mode, e.g.
-`http://<ha-ip>:8123/lovelace/0?kiosk`. Home Assistant blocks framing by default; set
-`http: use_x_frame_options: false` in `configuration.yaml` (or enable the widget's "Proxy through
-server" option). Authentication: log in once on the Pi's Chromium (plug in a keyboard, or use a
-long-lived access token with a kiosk add-on).
+Add a **Web page** widget with a dashboard URL, e.g. `http://<ha-ip>:8123/lovelace/0`.
+
+The admin **Live preview** runs in *your* browser, which is already logged into Home Assistant, so
+it is not a reliable test of what the Pi will show. The kiosk is a separate Chromium on the Pi with
+no logins. Three things have to be true for it to work there:
+
+1. **Framing allowed.** Home Assistant refuses to be shown in a frame unless `configuration.yaml`
+   has:
+
+   ```yaml
+   http:
+     use_x_frame_options: false
+   ```
+
+   (The widget's "Proxy through server" option strips the header instead, but Home Assistant's
+   frontend loads many assets by absolute URL, so the direct setting is the better choice.)
+
+2. **Reachable from the Pi.** Prefer the IP address over `homeassistant.local`; the installer adds
+   mDNS resolution to the Pi, but an IP never depends on it. If Home Assistant uses HTTPS with a
+   self-signed certificate, Chromium silently refuses to frame it; use plain HTTP on the LAN, a real
+   certificate, or add `--ignore-certificate-errors` to `CHROMIUM_EXTRA_FLAGS` in
+   `/etc/pimarquee/env` (LAN-only setups).
+
+3. **Logged in without a keyboard.** Use Home Assistant's trusted-networks auth provider so the Pi
+   is logged in automatically:
+
+   ```yaml
+   homeassistant:
+     auth_providers:
+       - type: homeassistant
+       - type: trusted_networks
+         trusted_networks:
+           - 192.168.1.50/32        # the Pi's IP
+         trusted_users:
+           192.168.1.50: a1b2c3...  # user id from Settings → People → user → ID
+         allow_bypass_login: true
+   ```
+
+   Restart Home Assistant, then reload the display. Make a dedicated non-admin "display" user for
+   this. Alternatively plug a keyboard into the Pi once and log in; the session is kept in the
+   kiosk's Chromium profile.
+
+For a cleaner look install the "kiosk-mode" HACS frontend plugin in Home Assistant and append
+`?kiosk` to the dashboard URL to hide its header and sidebar.
+
+To check from the Pi itself what the kiosk will get:
+
+```bash
+curl -sS -o /dev/null -D - http://<ha-ip>:8123/ | grep -iE "^HTTP|x-frame|location"
+```
+
+A `200` with no `x-frame-options` line is what you want.

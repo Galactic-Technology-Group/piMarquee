@@ -205,6 +205,11 @@ export function PropertiesPanel({ cameras }: { cameras: CameraView[] }) {
             Many sites refuse to load inside a frame. The proxy helps with simple dashboards; sites that need logins or load assets from other
             domains may still break.
           </p>
+          <p className="muted small">
+            The live preview uses this browser's logins, certificates and name resolution; the display is a separate browser on the Pi with none of
+            them. Use an IP address, plain HTTP on the LAN, and a login method that needs no keyboard (see docs/home-assistant.md for Home
+            Assistant).
+          </p>
         </>
       )}
 

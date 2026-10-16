@@ -35,10 +35,10 @@ apt-get update -qq
 apt-get install -y -qq --no-install-recommends \
   chromium cage wlr-randr seatd libgles2 \
   fonts-dejavu fonts-noto-core \
-  curl ca-certificates jq git rsync \
+  curl ca-certificates jq git rsync avahi-daemon libnss-mdns \
   cec-utils libcec6 2>/dev/null || \
 apt-get install -y -qq --no-install-recommends \
-  chromium cage wlr-randr seatd libgles2 fonts-dejavu fonts-noto-core curl ca-certificates jq git rsync
+  chromium cage wlr-randr seatd libgles2 fonts-dejavu fonts-noto-core curl ca-certificates jq git rsync avahi-daemon libnss-mdns
 
 CHROMIUM_BIN="$(command -v chromium || command -v chromium-browser || true)"
 [[ -n "$CHROMIUM_BIN" ]] || die "chromium not found after install"
