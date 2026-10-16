@@ -99,6 +99,21 @@ body,
   margin-top: 0.15em;
 }
 
+/* Belt and braces: no element of our own page ever shows a pointer. */
+* {
+  cursor: none !important;
+}
+
+/* Transparent layer above every widget so the pointer is hidden even over iframes,
+   whose documents would otherwise set their own cursor. */
+.cursor-shield {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  background: transparent;
+  cursor: none;
+}
+
 .blackout {
   position: fixed;
   inset: 0;

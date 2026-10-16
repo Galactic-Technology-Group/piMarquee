@@ -119,6 +119,7 @@ export function App() {
       ) : (
         <div className="empty">{resolved ? 'No active layout' : 'Connecting…'}</div>
       )}
+      {resolved?.hideCursor && !isPreview && <div className="cursor-shield" aria-hidden="true" />}
       {blackout && !isPreview && <div className="blackout" />}
       {status !== 'open' && <div className="offline-badge" title="Disconnected from server" />}
     </>

@@ -145,6 +145,13 @@ export function SettingsPage() {
             '0 = off. Reloads the kiosk page periodically to keep Chromium healthy on long runs.',
           )}
         </div>
+        <label className="check">
+          <input type="checkbox" checked={s.hideCursor} onChange={(e) => save({ hideCursor: e.target.checked })} /> Hide the mouse pointer on the display
+        </label>
+        <p className="small muted">
+          Keeps the pointer hidden even over embedded web pages. Turn it off only if the display has a touchscreen or mouse that should interact with
+          those pages.
+        </p>
         <div className="row">
           <button onClick={() => api.display.reload(false)}>Reload page</button>
           <button disabled={!pi.systemControl} onClick={() => api.settings.restart('kiosk').catch((e) => setError((e as Error).message))}>

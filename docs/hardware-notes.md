@@ -86,3 +86,14 @@ minute). `timedatectl` shows the sync state.
 
 Camera widgets are muted by default. Unmuting requests the audio track; whether it plays depends on
 the camera's codec (AAC/Opus/PCMU work; others do not) and on HDMI audio being routed in Chromium.
+
+## 8. Mouse pointer on the display
+
+cage hides the pointer only when no pointer device is attached; a mouse, or a wireless keyboard whose
+receiver also enumerates as a mouse, makes it draw the default arrow. The focused window can then hide
+it, so the display page requests `cursor: none` everywhere and, with **Settings → Hide the mouse
+pointer on the display** (default on), covers the screen with a transparent layer so the pointer stays
+hidden even over embedded web pages, whose documents would otherwise set their own cursor. That layer
+also blocks mouse/touch interaction with embedded pages; switch it off for a touchscreen dashboard.
+If the arrow still shows on an older cage with no mouse attached, unplug any USB receiver you are not
+using, or upgrade cage (0.1.5+ hides the pointer without a device).

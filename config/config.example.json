@@ -11,6 +11,7 @@
     "displayPowerMethod": "auto",
     "go2rtc": { "externalPort": 1984 },
     "autoReloadHours": 0,
+    "hideCursor": true,
     "mqtt": {
       "enabled": false,
       "url": "mqtt://homeassistant.local:1883",

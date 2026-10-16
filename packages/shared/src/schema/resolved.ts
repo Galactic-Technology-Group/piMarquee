@@ -41,6 +41,7 @@ export const ResolvedLayoutSchema = z.object({
   timezone: z.string(),
   locale: z.string(),
   autoReloadHours: z.number().int(),
+  hideCursor: z.boolean(),
   generatedAt: z.string(),
   rev: z.number().int(),
 });

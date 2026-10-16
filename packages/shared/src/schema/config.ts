@@ -196,6 +196,11 @@ export const SettingsObjectSchema = z
       .default({ externalPort: 1984 }),
     /** 0 = disabled. Periodic reload of the kiosk page to purge browser leaks. */
     autoReloadHours: z.number().int().min(0).max(168).default(0),
+    /**
+     * Cover the display with a transparent layer that hides the mouse pointer everywhere,
+     * including over embedded web pages. Also blocks mouse/touch interaction with those pages.
+     */
+    hideCursor: z.boolean().default(true),
     mqtt: MqttSettingsSchema.default({}),
   })
   .strict();

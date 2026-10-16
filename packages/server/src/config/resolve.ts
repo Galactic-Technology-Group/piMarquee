@@ -31,6 +31,7 @@ export function buildResolvedLayout(
     timezone: config.settings.timezone,
     locale: config.settings.locale,
     autoReloadHours: config.settings.autoReloadHours,
+    hideCursor: config.settings.hideCursor,
     generatedAt: new Date().toISOString(),
     rev,
   };
