@@ -100,8 +100,8 @@ export type ClockWidget = z.infer<typeof ClockWidgetSchema>;
 
 export const YoutubeWidgetSchema = WidgetBaseSchema.extend({
   type: z.literal('youtube'),
-  /** Full YouTube URL (watch, youtu.be, shorts, embed) or a bare 11-character video id. */
-  url: z.string().min(1).max(512),
+  /** Full YouTube URL (watch, youtu.be, shorts, embed) or a bare 11-character video id. Empty until configured. */
+  url: z.string().max(512).default(''),
   /**
    * download: the server fetches the video once with yt-dlp and the display plays the local file
    *           (no ads, no login, loops seamlessly, works offline).

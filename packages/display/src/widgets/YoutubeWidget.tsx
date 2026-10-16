@@ -10,7 +10,7 @@ export function YoutubeWidget({ widget }: { widget: ResolvedYoutubeWidget }) {
     return (
       <div className="placeholder">
         <div className="title">YouTube</div>
-        <div className="detail">Not a recognised YouTube link.</div>
+        <div className="detail">{widget.url ? 'Not a recognised YouTube link.' : 'No video link set. Add one in the editor.'}</div>
       </div>
     );
   }

@@ -133,7 +133,11 @@ export function EditorPage() {
       setError('Add a camera on the Cameras page first.');
       return;
     }
-    addWidget(defaultWidget(type, rect, extra));
+    try {
+      addWidget(defaultWidget(type, rect, extra));
+    } catch (e) {
+      setError(`Could not add ${type} widget: ${(e as Error).message}`);
+    }
   };
 
   if (error && !layout) return <div className="page error">{error}</div>;
