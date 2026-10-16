@@ -27,6 +27,9 @@ ExecStartPre=/usr/local/bin/pimarquee-wait-for-http http://127.0.0.1:${PORT}/hea
 ExecStart=/usr/bin/cage -d -- /usr/local/bin/pimarquee-kiosk
 Restart=always
 RestartSec=3
+# Chromium does not always exit when cage asks it to; give the whole group 10 s, then kill it.
+KillMode=mixed
+TimeoutStopSec=10
 
 [Install]
 WantedBy=graphical.target

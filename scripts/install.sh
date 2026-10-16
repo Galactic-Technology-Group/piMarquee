@@ -125,7 +125,7 @@ CHROMIUM_BIN=$CHROMIUM_BIN
 KIOSK_URL=http://127.0.0.1:$PORT/display/
 MEDIA_DIR=$DATA_DIR/media
 YTDLP_BIN=$YTDLP_BIN
-YTDLP_EXTRA_ARGS=--js-runtimes node
+YTDLP_EXTRA_ARGS="--js-runtimes node"
 LOG_LEVEL=info
 EOF
 chmod 0644 "$ENV_FILE"

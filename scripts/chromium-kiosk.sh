@@ -1,11 +1,25 @@
 #!/usr/bin/env bash
 # Launched by cage (see systemd/pimarquee-kiosk.service). Runs Chromium full-screen on the display page.
 set -u
-[[ -f /etc/pimarquee/env ]] && set -a && . /etc/pimarquee/env && set +a
 
+# Read KEY=value lines from the systemd EnvironmentFile without executing it as shell code
+# (a value containing a space, like "--js-runtimes node", would otherwise run a command).
+envval() {
+  local line
+  line="$(grep -m1 "^$1=" /etc/pimarquee/env 2>/dev/null || true)"
+  line="${line#*=}"
+  line="${line%\"}"
+  line="${line#\"}"
+  printf '%s' "$line"
+}
+
+CHROMIUM_BIN="${CHROMIUM_BIN:-$(envval CHROMIUM_BIN)}"
 CHROMIUM_BIN="${CHROMIUM_BIN:-$(command -v chromium || command -v chromium-browser)}"
+KIOSK_URL="${KIOSK_URL:-$(envval KIOSK_URL)}"
 KIOSK_URL="${KIOSK_URL:-http://127.0.0.1:8080/display/}"
-PROFILE="${KIOSK_PROFILE:-/var/lib/pimarquee/chromium}"
+PROFILE="${KIOSK_PROFILE:-$(envval KIOSK_PROFILE)}"
+PROFILE="${PROFILE:-/var/lib/pimarquee/chromium}"
+CHROMIUM_EXTRA_FLAGS="${CHROMIUM_EXTRA_FLAGS:-$(envval CHROMIUM_EXTRA_FLAGS)}"
 mkdir -p "$PROFILE"
 
 # Chromium refuses to start (or nags about a crash) if a previous run was killed.
