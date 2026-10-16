@@ -28,6 +28,8 @@ async function main(): Promise<void> {
     trustProxy: false,
     bodyLimit: 5 * 1024 * 1024,
     disableRequestLogging: true,
+    // Do not wait for idle keep-alive/WebSocket connections on close; systemd gives us 10 s.
+    forceCloseConnections: true,
   });
 
   const store = await ConfigStore.load(env.configPath);
@@ -119,13 +121,18 @@ async function main(): Promise<void> {
   void mqttPub.reconfigure().catch((err) => app.log.warn({ err }, 'mqtt start failed'));
   void media.sync(store.config).catch((err) => app.log.warn({ err }, 'initial media sync failed'));
   if (!env.noSystem) media.startSelfUpdate();
-  startMdns(store.config.settings.displayName, port);
+  startMdns(store.config.settings.displayName, port, (m) => app.log.warn(m));
 
   // Restore the persisted power state on boot (e.g. display was off before a reboot).
   if (store.config.display.power === 'off') void ctx.setPower(false).catch(() => undefined);
 
+  let shuttingDown = false;
   const shutdown = async (signal: string) => {
+    if (shuttingDown) return;
+    shuttingDown = true;
     app.log.info({ signal }, 'shutting down');
+    // Whatever happens below, be gone well before systemd's 10 s TimeoutStopSec.
+    setTimeout(() => process.exit(0), 3000).unref();
     clearInterval(statusTimer);
     go2rtcSync.stop();
     media.stop();
