@@ -221,6 +221,8 @@ export const SettingsObjectSchema = z
      * including over embedded web pages. Also blocks mouse/touch interaction with those pages.
      */
     hideCursor: z.boolean().default(true),
+    /** Keep downloaded YouTube videos on disk even when no layout references them (delete manually on the Media page). */
+    keepUnusedMedia: z.boolean().default(true),
     mqtt: MqttSettingsSchema.default({}),
   })
   .strict();

@@ -70,6 +70,19 @@ body,
 .widget-youtube {
   background: #000;
 }
+.placeholder .progress {
+  width: 60%;
+  height: 0.8vh;
+  background: #2a3138;
+  border-radius: 0.4vh;
+  overflow: hidden;
+  margin-top: 0.6vh;
+}
+.placeholder .progress-bar {
+  height: 100%;
+  background: #3b82f6;
+  transition: width 0.5s linear;
+}
 
 .widget-webpage iframe {
   border: 0;

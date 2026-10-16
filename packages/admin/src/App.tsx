@@ -5,6 +5,7 @@ import { useServerStatus } from './api/ws';
 import { LayoutsPage } from './pages/LayoutsPage';
 import { EditorPage } from './pages/EditorPage';
 import { CamerasPage } from './pages/CamerasPage';
+import { MediaPage } from './pages/MediaPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { LoginPage } from './pages/LoginPage';
 
@@ -31,6 +32,7 @@ export function App() {
           Layouts
         </NavLink>
         <NavLink to="/cameras">Cameras</NavLink>
+        <NavLink to="/media">Media</NavLink>
         <NavLink to="/settings">Settings</NavLink>
         <span className="spacer" />
         <span className={`dot ${connected ? 'on' : 'off'}`} title={connected ? 'Connected to server' : 'Disconnected'} />
@@ -42,6 +44,7 @@ export function App() {
         <Route path="/" element={<LayoutsPage />} />
         <Route path="/layouts/:id" element={<EditorPage />} />
         <Route path="/cameras" element={<CamerasPage />} />
+        <Route path="/media" element={<MediaPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<LayoutsPage />} />
       </Routes>

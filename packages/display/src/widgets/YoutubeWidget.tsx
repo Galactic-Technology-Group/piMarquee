@@ -31,11 +31,14 @@ export function YoutubeWidget({ widget }: { widget: ResolvedYoutubeWidget }) {
 
   const media = widget.media;
   if (!media || media.status !== 'ready' || !media.src) {
+    const p = media?.progress;
     const detail =
       !media || media.status === 'pending'
         ? 'Queued for download…'
         : media.status === 'downloading'
-          ? 'Downloading video…'
+          ? p && p.totalBytes
+            ? `Downloading… ${p.percent.toFixed(0)}%${p.part > 1 ? ` (part ${p.part})` : ''}${p.etaSec != null ? `, ${Math.round(p.etaSec)} s left` : ''}`
+            : 'Downloading video…'
           : media.status === 'unavailable'
             ? `Video unavailable: ${media.error ?? ''}`
             : `Download failed, retrying. ${media.error ?? ''}`;
@@ -43,6 +46,11 @@ export function YoutubeWidget({ widget }: { widget: ResolvedYoutubeWidget }) {
       <div className="placeholder">
         <div className="title">{media?.title ?? widget.name ?? 'YouTube'}</div>
         <div className="detail">{detail}</div>
+        {media?.status === 'downloading' && p?.totalBytes ? (
+          <div className="progress">
+            <div className="progress-bar" style={{ width: `${p.percent}%` }} />
+          </div>
+        ) : null}
       </div>
     );
   }

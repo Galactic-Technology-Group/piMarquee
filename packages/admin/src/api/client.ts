@@ -61,6 +61,13 @@ export interface PiView {
   systemControl: boolean;
 }
 
+export type MediaItem = MediaStatus & { usedBy: { layoutId: string; layoutName: string; widgetName: string }[] };
+export interface MediaListResponse {
+  items: MediaItem[];
+  totalBytes: number;
+  keepUnusedMedia: boolean;
+}
+
 export interface CameraTestResult {
   ok: boolean;
   medias: string[];
@@ -101,8 +108,9 @@ export const api = {
     resolved: (layoutId?: string) => request<ResolvedLayout>('GET', `/api/v1/display/resolved${layoutId ? `?layoutId=${layoutId}` : ''}`),
   },
   media: {
-    list: () => request<MediaStatus[]>('GET', '/api/v1/media'),
+    list: () => request<MediaListResponse>('GET', '/api/v1/media'),
     refresh: (videoId: string) => request<MediaStatus>('POST', `/api/v1/media/${videoId}/refresh`),
+    remove: (videoId: string) => request<void>('DELETE', `/api/v1/media/${videoId}`),
   },
   settings: {
     get: () => request<SettingsView>('GET', '/api/v1/settings'),

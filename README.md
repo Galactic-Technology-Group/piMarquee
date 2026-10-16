@@ -77,9 +77,11 @@ static pages) but **not** for sites that need logins, cookies or load assets fro
 Add a **YouTube** widget and paste any video link. In the default **Download** mode the server
 fetches the video once with [yt-dlp](https://github.com/yt-dlp/yt-dlp) (≤720p H.264 by default) into
 `/var/lib/pimarquee/media/` and the display plays the local file: no ads, no login prompt, a seamless
-loop, and it keeps playing if the internet drops. The display shows a placeholder while the download
-runs; the widget's properties panel shows progress and a "Re-download" button. Videos that are no
-longer referenced by any layout are deleted automatically. yt-dlp updates itself daily because
+loop, and it keeps playing if the internet drops. While the download runs the display shows a
+placeholder with a progress bar, and the widget's properties panel and the **Media** page show
+percent, speed and time left. Downloads are kept on the Pi even when no layout uses them any more
+(Settings → *Keep unused videos*, on by default), so re-adding a video is instant; the Media page
+lists every file with its size and lets you delete or re-download it. yt-dlp updates itself daily because
 YouTube changes frequently; if downloads start failing, run `sudo /opt/pimarquee/scripts/update.sh`.
 If YouTube answers "Sign in to confirm you're not a bot" (it does this for some networks), export your
 browser's YouTube cookies in Netscape format (see the yt-dlp wiki) to

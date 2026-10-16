@@ -63,13 +63,18 @@ The authoritative definitions are the zod schemas in `packages/shared/src/schema
 
 | Method | Path | Body / notes |
 |---|---|---|
-| GET | `/api/v1/media` | `[{videoId, status (pending|downloading|ready|error|unavailable), src, title, bytes, error, updatedAt}]` |
+| GET | `/api/v1/media` | `{items: [{videoId, status (pending|downloading|ready|error|unavailable), progress, src, title, bytes, error, updatedAt, usedBy: [{layoutId, layoutName, widgetName}]}], totalBytes, keepUnusedMedia}` |
 | POST | `/api/v1/media/:videoId/refresh` | delete and re-download that video |
+| DELETE | `/api/v1/media/:videoId` | delete the file (re-queued immediately if a layout still uses it) |
 | GET | `/media/<videoId>.mp4` | the downloaded file (supports Range requests) |
 
-Downloads are driven by the layouts: saving a layout with a `youtube` widget in `download` mode
-queues the video; removing the last reference deletes the file. A `config.changed` WebSocket message
-with scope `media` is sent whenever a download state changes.
+`progress` is `null` unless `status` is `downloading`, then
+`{percent, downloadedBytes, totalBytes|null, speedBps|null, etaSec|null, part}` (`part` 2 = the
+audio track when video and audio are fetched separately). Downloads are driven by the layouts:
+saving a layout with a `youtube` widget in `download` mode queues the video. Files are kept when no
+layout references them unless `settings.keepUnusedMedia` is false. A `config.changed` WebSocket
+message with scope `media` is sent whenever a download state or progress changes (progress at most
+once per second).
 
 ## Cameras
 

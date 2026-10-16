@@ -152,6 +152,13 @@ export function SettingsPage() {
           Keeps the pointer hidden even over embedded web pages. Turn it off only if the display has a touchscreen or mouse that should interact with
           those pages.
         </p>
+        <label className="check">
+          <input type="checkbox" checked={s.keepUnusedMedia} onChange={(e) => save({ keepUnusedMedia: e.target.checked })} /> Keep unused videos
+        </label>
+        <p className="small muted">
+          Downloaded YouTube videos stay on the Pi even when no layout uses them, so re-adding one is instant. Delete them by hand on the Media page.
+          Turn off to free space automatically.
+        </p>
         <div className="row">
           <button onClick={() => api.display.reload(false)}>Reload page</button>
           <button disabled={!pi.systemControl} onClick={() => api.settings.restart('kiosk').catch((e) => setError((e as Error).message))}>

@@ -90,7 +90,7 @@ async function main(): Promise<void> {
     if (change.scope === 'cameras' || change.scope === 'all') {
       void go2rtcSync.apply(change.config.cameras).catch((err) => app.log.warn({ err }, 'go2rtc sync failed'));
     }
-    if (change.scope === 'layouts' || change.scope === 'all') {
+    if (change.scope === 'layouts' || change.scope === 'settings' || change.scope === 'all') {
       void media.sync(change.config).catch((err) => app.log.warn({ err }, 'media sync failed'));
     }
     if (change.scope === 'settings' || change.scope === 'all') {
@@ -102,6 +102,11 @@ async function main(): Promise<void> {
 
   // A download finishing (or failing) changes what the display should show.
   media.on('change', () => {
+    ctx.pushResolved();
+    hub.broadcast({ type: 'config.changed', rev: store.rev, scope: 'media' }, 'admin');
+  });
+  // Throttled (1/s) by the manager; lets the display placeholder and the admin show live progress.
+  media.on('progress', () => {
     ctx.pushResolved();
     hub.broadcast({ type: 'config.changed', rev: store.rev, scope: 'media' }, 'admin');
   });

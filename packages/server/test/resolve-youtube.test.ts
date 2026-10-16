@@ -16,6 +16,7 @@ describe('buildResolvedLayout: youtube widgets', () => {
     const ready: MediaStatus = {
       videoId: 'dQw4w9WgXcQ',
       status: 'ready',
+      progress: null,
       src: '/media/dQw4w9WgXcQ.mp4',
       title: 'Test',
       bytes: 1234,

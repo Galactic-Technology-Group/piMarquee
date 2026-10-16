@@ -4,6 +4,7 @@ import { FONT_FAMILIES, extractYoutubeId } from '@pimarquee/shared';
 import { api, type CameraView } from '../api/client';
 import { useConfigChange } from '../api/ws';
 import { useEditor } from '../store';
+import { ProgressBar, mediaLabel } from '../media';
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
   return (
@@ -342,44 +343,36 @@ function MediaStatusLine({ url }: { url: string }) {
     if (!videoId) return;
     api.media
       .list()
-      .then((all) => setStatus(all.find((m) => m.videoId === videoId) ?? null))
+      .then((r) => setStatus(r.items.find((m) => m.videoId === videoId) ?? null))
       .catch(() => setStatus(null));
   }, [videoId]);
   useEffect(refresh, [refresh]);
   useConfigChange(['media', 'layouts'], refresh);
 
-  if (!videoId) return <p className="small bad">Not a recognised YouTube link.</p>;
+  if (!videoId) return <p className="small bad">{url ? 'Not a recognised YouTube link.' : 'Paste a YouTube link above.'}</p>;
 
-  const label = !status
-    ? 'Not downloaded yet (saves with the layout)'
-    : status.status === 'ready'
-      ? `Ready${status.title ? `: ${status.title}` : ''}${status.bytes ? ` (${Math.round(status.bytes / 1048576)} MB)` : ''}`
-      : status.status === 'downloading'
-        ? 'Downloading…'
-        : status.status === 'pending'
-          ? 'Queued for download'
-          : status.status === 'unavailable'
-            ? `Unavailable: ${status.error ?? ''}`
-            : `Failed (will retry): ${status.error ?? ''}`;
-  const cls = !status || status.status === 'pending' || status.status === 'downloading' ? 'muted' : status.status === 'ready' ? 'ok' : 'bad';
+  const { text, cls } = mediaLabel(status);
 
   return (
-    <div className="row">
-      <span className={`small ${cls}`}>{label}</span>
-      <span className="spacer" />
-      <button
-        type="button"
-        disabled={busy || status?.status === 'downloading'}
-        onClick={() => {
-          setBusy(true);
-          api.media
-            .refresh(videoId)
-            .then(refresh)
-            .finally(() => setBusy(false));
-        }}
-      >
-        Re-download
-      </button>
+    <div>
+      <div className="row">
+        <span className={`small ${cls}`}>{text}</span>
+        <span className="spacer" />
+        <button
+          type="button"
+          disabled={busy || status?.status === 'downloading'}
+          onClick={() => {
+            setBusy(true);
+            api.media
+              .refresh(videoId)
+              .then(refresh)
+              .finally(() => setBusy(false));
+          }}
+        >
+          Re-download
+        </button>
+      </div>
+      <ProgressBar status={status} />
     </div>
   );
 }

@@ -24,10 +24,24 @@ export type ResolvedStream = z.infer<typeof ResolvedStreamSchema>;
 export const ResolvedCameraWidgetSchema = CameraWidgetSchema.extend({ stream: ResolvedStreamSchema });
 export type ResolvedCameraWidget = z.infer<typeof ResolvedCameraWidgetSchema>;
 
+/** Live progress of a running download (from yt-dlp). */
+export const MediaProgressSchema = z.object({
+  /** 0..100 for the file currently being fetched (video and audio are fetched one after another). */
+  percent: z.number(),
+  downloadedBytes: z.number(),
+  totalBytes: z.number().nullable(),
+  speedBps: z.number().nullable(),
+  etaSec: z.number().nullable(),
+  /** 1-based index of the file being fetched (1 = video, 2 = audio when merged separately). */
+  part: z.number().int(),
+});
+export type MediaProgress = z.infer<typeof MediaProgressSchema>;
+
 /** Download state of a YouTube video on the server. */
 export const MediaStatusSchema = z.object({
   videoId: z.string(),
   status: z.enum(['pending', 'downloading', 'ready', 'error', 'unavailable']),
+  progress: MediaProgressSchema.nullable(),
   /** Browser-relative URL of the local file when status is ready. */
   src: z.string().nullable(),
   title: z.string().nullable(),
