@@ -12,8 +12,10 @@ WorkingDirectory=/etc/go2rtc
 Restart=always
 RestartSec=3
 Nice=-5
-# go2rtc only needs network + its config; lock the rest down.
+# go2rtc only needs network + its config; lock the rest down. It must be able to write its own
+# config: the streams API persists added streams there and returns HTTP 400 if that write fails.
 ProtectSystem=full
+ReadWritePaths=/etc/go2rtc
 ProtectHome=true
 NoNewPrivileges=true
 PrivateTmp=true

@@ -4,6 +4,12 @@ import type { AppContext } from '../context.js';
 import { summariseProbe } from '../go2rtc/client.js';
 import { HttpError, parseBody, redactCamera } from './util.js';
 
+/** Trim whitespace and lower-case the scheme ("RTSP://" -> "rtsp://"); go2rtc matches schemes case-sensitively. */
+export function normalizeSourceUrl(url: string): string {
+  const trimmed = url.trim();
+  return trimmed.replace(/^([A-Za-z][A-Za-z0-9+.-]*):/, (_m, scheme: string) => `${scheme.toLowerCase()}:`);
+}
+
 export function registerCameraRoutes(app: FastifyInstance, ctx: AppContext): void {
   const find = (id: string): Camera => {
     const c = ctx.store.config.cameras.find((x) => x.id === id);
@@ -16,7 +22,7 @@ export function registerCameraRoutes(app: FastifyInstance, ctx: AppContext): voi
   app.post('/api/v1/cameras', async (req, reply) => {
     const input = parseBody(CameraInputSchema, req.body);
     const id = newId();
-    const cam: Camera = { ...input, id, go2rtcName: `cam_${id}`, enabled: input.enabled ?? true };
+    const cam: Camera = { ...input, rtspUrl: normalizeSourceUrl(input.rtspUrl), id, go2rtcName: `cam_${id}`, enabled: input.enabled ?? true };
     await ctx.store.update('cameras', (d) => {
       d.cameras.push(cam);
     });
@@ -30,6 +36,7 @@ export function registerCameraRoutes(app: FastifyInstance, ctx: AppContext): voi
     const input = parseBody(CameraInputSchema.partial(), req.body);
     // A redacted URL coming back from the UI means "unchanged".
     if (input.rtspUrl && /:\/\/\*\*\*(:\*\*\*)?@/.test(input.rtspUrl)) delete input.rtspUrl;
+    if (input.rtspUrl) input.rtspUrl = normalizeSourceUrl(input.rtspUrl);
     const updated: Camera = { ...existing, ...input, id: existing.id, go2rtcName: existing.go2rtcName };
     await ctx.store.update('cameras', (d) => {
       const i = d.cameras.findIndex((c) => c.id === existing.id);

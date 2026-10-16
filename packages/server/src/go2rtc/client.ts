@@ -36,6 +36,12 @@ export class Go2rtcClient {
     }
   }
 
+  /** go2rtc puts a short reason in the body of error responses; include it so the UI can show it. */
+  private async fail(what: string, r: Response): Promise<never> {
+    const body = (await r.text().catch(() => '')).trim().slice(0, 200);
+    throw new Error(`go2rtc ${what}: HTTP ${r.status}${body ? ` (${body})` : ''}`);
+  }
+
   async isReachable(): Promise<boolean> {
     try {
       const r = await this.req('/api', undefined, 2000);
@@ -47,27 +53,36 @@ export class Go2rtcClient {
 
   async listStreams(): Promise<Go2rtcStreams> {
     const r = await this.req('/api/streams');
-    if (!r.ok) throw new Error(`go2rtc list streams: HTTP ${r.status}`);
+    if (!r.ok) await this.fail('list streams', r);
     return (await r.json()) as Go2rtcStreams;
   }
 
   async putStream(name: string, src: string): Promise<void> {
     const q = new URLSearchParams({ name, src });
     const r = await this.req(`/api/streams?${q.toString()}`, { method: 'PUT' });
-    if (!r.ok) throw new Error(`go2rtc put stream ${name}: HTTP ${r.status}`);
+    if (r.ok) return;
+    // go2rtc creates the stream in memory first and only then persists it to its YAML. If the
+    // persist step fails (read-only config) it still answers 400 although the stream is live.
+    // We write the YAML ourselves, so treat "exists after PUT" as success.
+    const body = (await r.text().catch(() => '')).trim();
+    const exists = await this.listStreams()
+      .then((s) => name in s)
+      .catch(() => false);
+    if (exists) return;
+    throw new Error(`go2rtc put stream ${name}: HTTP ${r.status}${body ? ` (${body.slice(0, 200)})` : ''}`);
   }
 
   async deleteStream(name: string): Promise<void> {
     const q = new URLSearchParams({ src: name });
     const r = await this.req(`/api/streams?${q.toString()}`, { method: 'DELETE' });
-    if (!r.ok && r.status !== 404) throw new Error(`go2rtc delete stream ${name}: HTTP ${r.status}`);
+    if (!r.ok && r.status !== 404) await this.fail(`delete stream ${name}`, r);
   }
 
   /** Ask go2rtc to open the source and report its codecs/medias. */
   async probe(name: string): Promise<Go2rtcStreamInfo> {
     const q = new URLSearchParams({ src: name });
     const r = await this.req(`/api/streams?${q.toString()}`, undefined, 15000);
-    if (!r.ok) throw new Error(`go2rtc probe ${name}: HTTP ${r.status}`);
+    if (!r.ok) await this.fail(`probe ${name}`, r);
     return (await r.json()) as Go2rtcStreamInfo;
   }
 
