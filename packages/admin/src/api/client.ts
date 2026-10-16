@@ -1,4 +1,4 @@
-import type { Camera, Layout, ResolvedLayout, Settings } from '@pimarquee/shared';
+import type { Camera, Layout, MediaStatus, ResolvedLayout, Settings } from '@pimarquee/shared';
 
 export class ApiError extends Error {
   constructor(
@@ -99,6 +99,10 @@ export const api = {
     power: (on: boolean) => request<{ power: string }>('PUT', '/api/v1/display/power', { on }),
     reload: (hard = false) => request<{ ok: boolean }>('POST', '/api/v1/display/reload', { hard }),
     resolved: (layoutId?: string) => request<ResolvedLayout>('GET', `/api/v1/display/resolved${layoutId ? `?layoutId=${layoutId}` : ''}`),
+  },
+  media: {
+    list: () => request<MediaStatus[]>('GET', '/api/v1/media'),
+    refresh: (videoId: string) => request<MediaStatus>('POST', `/api/v1/media/${videoId}/refresh`),
   },
   settings: {
     get: () => request<SettingsView>('GET', '/api/v1/settings'),

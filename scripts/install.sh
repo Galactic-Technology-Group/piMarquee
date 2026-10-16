@@ -35,10 +35,10 @@ apt-get update -qq
 apt-get install -y -qq --no-install-recommends \
   chromium cage wlr-randr seatd libgles2 \
   fonts-dejavu fonts-noto-core \
-  curl ca-certificates jq git rsync avahi-daemon libnss-mdns \
+  curl ca-certificates jq git rsync avahi-daemon libnss-mdns ffmpeg \
   cec-utils libcec6 2>/dev/null || \
 apt-get install -y -qq --no-install-recommends \
-  chromium cage wlr-randr seatd libgles2 fonts-dejavu fonts-noto-core curl ca-certificates jq git rsync avahi-daemon libnss-mdns
+  chromium cage wlr-randr seatd libgles2 fonts-dejavu fonts-noto-core curl ca-certificates jq git rsync avahi-daemon libnss-mdns ffmpeg
 
 CHROMIUM_BIN="$(command -v chromium || command -v chromium-browser || true)"
 [[ -n "$CHROMIUM_BIN" ]] || die "chromium not found after install"
@@ -72,7 +72,19 @@ done
 # A lingering user session gives the backend an XDG_RUNTIME_DIR for wlr-randr at boot.
 loginctl enable-linger "$APP_USER" 2>/dev/null || true
 
-mkdir -p "$DATA_DIR/chromium" "$GO2RTC_CONF_DIR" "$(dirname "$ENV_FILE")" "$APP_DIR"
+mkdir -p "$DATA_DIR/chromium" "$DATA_DIR/media" "$DATA_DIR/bin" "$GO2RTC_CONF_DIR" "$(dirname "$ENV_FILE")" "$APP_DIR"
+
+# --- yt-dlp (YouTube widget) --------------------------------------------------
+# Lives in the data dir, owned by the service user, so the server can run `yt-dlp -U` itself:
+# YouTube changes often and a stale yt-dlp stops downloading within weeks.
+YTDLP_BIN="$DATA_DIR/bin/yt-dlp"
+if [[ ! -x "$YTDLP_BIN" ]]; then
+  log "Installing yt-dlp"
+  curl -fsSL -o "$YTDLP_BIN.tmp" "https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux_aarch64"
+  chmod +x "$YTDLP_BIN.tmp"
+  mv "$YTDLP_BIN.tmp" "$YTDLP_BIN"
+fi
+log "yt-dlp: $("$YTDLP_BIN" --version 2>&1 | head -1)"
 chown -R "$APP_USER:$APP_USER" "$DATA_DIR"
 
 # --- application code ---------------------------------------------------------
@@ -111,6 +123,9 @@ GO2RTC_CONFIG=$GO2RTC_CONF_DIR/go2rtc.yaml
 GO2RTC_TEMPLATE=$GO2RTC_CONF_DIR/go2rtc.template.yaml
 CHROMIUM_BIN=$CHROMIUM_BIN
 KIOSK_URL=http://127.0.0.1:$PORT/display/
+MEDIA_DIR=$DATA_DIR/media
+YTDLP_BIN=$YTDLP_BIN
+YTDLP_EXTRA_ARGS=--js-runtimes node
 LOG_LEVEL=info
 EOF
 chmod 0644 "$ENV_FILE"

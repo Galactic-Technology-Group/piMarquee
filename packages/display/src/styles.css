@@ -67,6 +67,10 @@ body,
   font-size: 1.6vh;
 }
 
+.widget-youtube {
+  background: #000;
+}
+
 .widget-webpage iframe {
   border: 0;
   background: #fff;

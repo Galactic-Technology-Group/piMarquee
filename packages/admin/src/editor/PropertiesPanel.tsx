@@ -1,6 +1,8 @@
-import type { Widget } from '@pimarquee/shared';
-import { FONT_FAMILIES } from '@pimarquee/shared';
-import type { CameraView } from '../api/client';
+import { useCallback, useEffect, useState } from 'react';
+import type { MediaStatus, Widget } from '@pimarquee/shared';
+import { FONT_FAMILIES, extractYoutubeId } from '@pimarquee/shared';
+import { api, type CameraView } from '../api/client';
+import { useConfigChange } from '../api/ws';
 import { useEditor } from '../store';
 
 function Field({ label, children, hint }: { label: string; children: React.ReactNode; hint?: string }) {
@@ -280,6 +282,104 @@ export function PropertiesPanel({ cameras }: { cameras: CameraView[] }) {
           <FontFields widget={widget} setAny={setAny} />
         </>
       )}
+
+      {widget.type === 'youtube' && (
+        <>
+          <Field label="YouTube link or video id" hint="watch, youtu.be and shorts links all work">
+            <input value={widget.url} placeholder="https://www.youtube.com/watch?v=…" onChange={(e) => setAny('url', e.target.value)} />
+          </Field>
+          <Field label="Playback">
+            <select value={widget.mode} onChange={(e) => setAny('mode', e.target.value)}>
+              <option value="download">Download to the Pi (no ads, no login, seamless loop)</option>
+              <option value="embed">YouTube embed (no login; YouTube may insert ads)</option>
+            </select>
+          </Field>
+          <div className="row">
+            <Check checked={widget.loop} onChange={(v) => setAny('loop', v)} label="Loop" />
+            <Check checked={widget.muted} onChange={(v) => setAny('muted', v)} label="Muted" />
+          </div>
+          <div className="grid2">
+            <Field label="Fit">
+              <select value={widget.fit} onChange={(e) => setAny('fit', e.target.value)}>
+                <option value="contain">Contain (letterbox)</option>
+                <option value="cover">Cover (crop)</option>
+              </select>
+            </Field>
+            <Field label="Start at (seconds)">
+              <Num value={widget.startSec} min={0} onChange={(v) => setAny('startSec', Math.max(0, Math.round(v)))} />
+            </Field>
+          </div>
+          {widget.mode === 'download' && (
+            <>
+              <Field label="Max quality" hint="720p is the sweet spot for a Pi 4; 1080p costs a lot of CPU.">
+                <select value={widget.maxHeight} onChange={(e) => setAny('maxHeight', Number(e.target.value))}>
+                  <option value={360}>360p</option>
+                  <option value={480}>480p</option>
+                  <option value={720}>720p</option>
+                  <option value={1080}>1080p</option>
+                </select>
+              </Field>
+              <MediaStatusLine url={widget.url} />
+            </>
+          )}
+          <p className="muted small">
+            Download mode fetches the video once with yt-dlp and plays the file locally, so it never shows ads or asks for a login and keeps working
+            offline. Changes to the link start a new download; the display shows a placeholder until it is ready.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+/** Live download state for the YouTube widget's video, with a re-download button. */
+function MediaStatusLine({ url }: { url: string }) {
+  const videoId = extractYoutubeId(url);
+  const [status, setStatus] = useState<MediaStatus | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const refresh = useCallback(() => {
+    if (!videoId) return;
+    api.media
+      .list()
+      .then((all) => setStatus(all.find((m) => m.videoId === videoId) ?? null))
+      .catch(() => setStatus(null));
+  }, [videoId]);
+  useEffect(refresh, [refresh]);
+  useConfigChange(['media', 'layouts'], refresh);
+
+  if (!videoId) return <p className="small bad">Not a recognised YouTube link.</p>;
+
+  const label = !status
+    ? 'Not downloaded yet (saves with the layout)'
+    : status.status === 'ready'
+      ? `Ready${status.title ? `: ${status.title}` : ''}${status.bytes ? ` (${Math.round(status.bytes / 1048576)} MB)` : ''}`
+      : status.status === 'downloading'
+        ? 'Downloading…'
+        : status.status === 'pending'
+          ? 'Queued for download'
+          : status.status === 'unavailable'
+            ? `Unavailable: ${status.error ?? ''}`
+            : `Failed (will retry): ${status.error ?? ''}`;
+  const cls = !status || status.status === 'pending' || status.status === 'downloading' ? 'muted' : status.status === 'ready' ? 'ok' : 'bad';
+
+  return (
+    <div className="row">
+      <span className={`small ${cls}`}>{label}</span>
+      <span className="spacer" />
+      <button
+        type="button"
+        disabled={busy || status?.status === 'downloading'}
+        onClick={() => {
+          setBusy(true);
+          api.media
+            .refresh(videoId)
+            .then(refresh)
+            .finally(() => setBusy(false));
+        }}
+      >
+        Re-download
+      </button>
     </div>
   );
 }

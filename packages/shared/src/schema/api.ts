@@ -34,7 +34,7 @@ export { WidgetSchema };
 export const WsRoleSchema = z.enum(['display', 'admin']);
 export type WsRole = z.infer<typeof WsRoleSchema>;
 
-export const ConfigScopeSchema = z.enum(['layouts', 'cameras', 'settings', 'display', 'auth', 'all']);
+export const ConfigScopeSchema = z.enum(['layouts', 'cameras', 'settings', 'display', 'auth', 'media', 'all']);
 export type ConfigScope = z.infer<typeof ConfigScopeSchema>;
 
 export const ClientMessageSchema = z.discriminatedUnion('type', [

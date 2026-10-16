@@ -6,6 +6,7 @@ import {
   StreamModeSchema,
   TextWidgetSchema,
   WebpageWidgetSchema,
+  YoutubeWidgetSchema,
 } from './config.js';
 
 /** What the display page actually renders. Built by the server, never persisted. */
@@ -23,11 +24,31 @@ export type ResolvedStream = z.infer<typeof ResolvedStreamSchema>;
 export const ResolvedCameraWidgetSchema = CameraWidgetSchema.extend({ stream: ResolvedStreamSchema });
 export type ResolvedCameraWidget = z.infer<typeof ResolvedCameraWidgetSchema>;
 
+/** Download state of a YouTube video on the server. */
+export const MediaStatusSchema = z.object({
+  videoId: z.string(),
+  status: z.enum(['pending', 'downloading', 'ready', 'error', 'unavailable']),
+  /** Browser-relative URL of the local file when status is ready. */
+  src: z.string().nullable(),
+  title: z.string().nullable(),
+  bytes: z.number().nullable(),
+  error: z.string().nullable(),
+  updatedAt: z.string(),
+});
+export type MediaStatus = z.infer<typeof MediaStatusSchema>;
+
+export const ResolvedYoutubeWidgetSchema = YoutubeWidgetSchema.extend({
+  videoId: z.string().nullable(),
+  media: MediaStatusSchema.nullable(),
+});
+export type ResolvedYoutubeWidget = z.infer<typeof ResolvedYoutubeWidgetSchema>;
+
 export const ResolvedWidgetSchema = z.discriminatedUnion('type', [
   ResolvedCameraWidgetSchema,
   WebpageWidgetSchema,
   TextWidgetSchema,
   ClockWidgetSchema,
+  ResolvedYoutubeWidgetSchema,
 ]);
 export type ResolvedWidget = z.infer<typeof ResolvedWidgetSchema>;
 

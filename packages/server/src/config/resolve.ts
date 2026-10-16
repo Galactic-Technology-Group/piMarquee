@@ -1,27 +1,35 @@
-import type {
-  Config,
-  PiInfo,
-  ResolvedLayout,
-  ResolvedWidget,
-  ResolvedCameraWidget,
-  CameraWidget,
-  StreamMode,
+import {
+  extractYoutubeId,
+  type Config,
+  type PiInfo,
+  type ResolvedLayout,
+  type ResolvedWidget,
+  type ResolvedCameraWidget,
+  type ResolvedYoutubeWidget,
+  type CameraWidget,
+  type MediaStatus,
+  type StreamMode,
 } from '@pimarquee/shared';
 
 export function effectiveMaxStreams(config: Config, pi: PiInfo): number {
   return config.settings.maxStreamsOverride ?? pi.defaultMaxStreams;
 }
 
+/** Looks up the download state of a YouTube video (null = nothing known yet). */
+export type MediaLookup = (videoId: string) => MediaStatus | null;
+
 /**
  * Build what the display should render for a layout: every camera widget is
  * annotated with its go2rtc stream and whether it is allowed under the
- * concurrent-stream limit. Each visible camera *widget* counts as one decode.
+ * concurrent-stream limit (each visible camera *widget* counts as one decode),
+ * and every YouTube widget with its video id and local download state.
  */
 export function buildResolvedLayout(
   config: Config,
   pi: PiInfo,
   rev: number,
   layoutId: string | null = config.display.activeLayoutId,
+  media: MediaLookup = () => null,
 ): ResolvedLayout {
   const maxStreams = effectiveMaxStreams(config, pi);
   const layout = layoutId ? (config.layouts.find((l) => l.id === layoutId) ?? null) : null;
@@ -58,6 +66,15 @@ export function buildResolvedLayout(
   }
 
   const widgets: ResolvedWidget[] = layout.widgets.map((w) => {
+    if (w.type === 'youtube') {
+      const videoId = extractYoutubeId(w.url);
+      const resolvedYt: ResolvedYoutubeWidget = {
+        ...w,
+        videoId,
+        media: videoId && w.mode === 'download' ? media(videoId) : null,
+      };
+      return resolvedYt;
+    }
     if (w.type !== 'camera') return w;
     const cam = cameras.get(w.cameraId);
     const mode: StreamMode = w.mode === 'auto' ? config.settings.defaultStreamMode : w.mode;

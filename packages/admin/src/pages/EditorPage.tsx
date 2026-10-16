@@ -127,7 +127,7 @@ export function EditorPage() {
   }, [selectedId, undo, redo, removeWidget, duplicateWidget, updateWidget, bringForward, sendBackward]);
 
   const add = (type: WidgetType) => {
-    const rect = type === 'clock' ? { x: 30, y: 30, w: 40, h: 20 } : { x: 25, y: 25, w: 50, h: 50 };
+    const rect = type === 'clock' ? { x: 30, y: 30, w: 40, h: 20 } : type === 'youtube' ? { x: 20, y: 20, w: 60, h: 60 } : { x: 25, y: 25, w: 50, h: 50 };
     const extra: Record<string, unknown> = type === 'camera' ? { cameraId: cameras[0]?.id ?? '' } : {};
     if (type === 'camera' && !cameras[0]) {
       setError('Add a camera on the Cameras page first.');
@@ -158,6 +158,7 @@ export function EditorPage() {
         <button onClick={() => add('webpage')}>🌐 Web page</button>
         <button onClick={() => add('text')}>🅣 Text</button>
         <button onClick={() => add('clock')}>🕒 Clock</button>
+        <button onClick={() => add('youtube')}>▶ YouTube</button>
         <span className="sep" />
         <button disabled={!canUndo} onClick={undo} title="Undo (Ctrl+Z)">
           ↶

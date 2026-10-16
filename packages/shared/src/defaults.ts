@@ -23,6 +23,8 @@ export function defaultWidget(type: WidgetType, rect: Rect, extra: Record<string
       return WidgetSchema.parse({ ...base, type, content: extra.content ?? 'New text', name: base.name || 'Text' });
     case 'clock':
       return WidgetSchema.parse({ ...base, type, name: base.name || 'Clock' });
+    case 'youtube':
+      return WidgetSchema.parse({ ...base, type, url: extra.url ?? '', name: base.name || 'YouTube' });
   }
 }
 

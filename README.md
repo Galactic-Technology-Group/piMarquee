@@ -6,6 +6,7 @@ display with a free-form layout of widgets, edited from a web admin UI on your p
 - **RTSP camera feeds** (IP cameras, via [go2rtc](https://github.com/AlexxIT/go2rtc) → WebRTC/MSE/MJPEG)
 - **Embedded web pages** (dashboards, Grafana, Home Assistant, weather…)
 - **Text blocks** and a **clock/date**
+- **YouTube videos** played ad-free and without a login (downloaded once to the Pi with yt-dlp), optionally looping
 
 Layouts are stored as percentages of the screen, so they scale to any display. Multiple named layouts
 can be switched from the admin UI, the REST API, Home Assistant (MQTT) or a future Android app.
@@ -70,6 +71,26 @@ Many sites send `X-Frame-Options` / CSP headers that forbid being shown in a fra
 "Proxy through server" option fetches the page through the Pi and strips those headers. It works for
 simple dashboards (Grafana with `allow_embedding`, Home Assistant with `use_x_frame_options: false`,
 static pages) but **not** for sites that need logins, cookies or load assets from other domains.
+
+### YouTube videos
+
+Add a **YouTube** widget and paste any video link. In the default **Download** mode the server
+fetches the video once with [yt-dlp](https://github.com/yt-dlp/yt-dlp) (≤720p H.264 by default) into
+`/var/lib/pimarquee/media/` and the display plays the local file: no ads, no login prompt, a seamless
+loop, and it keeps playing if the internet drops. The display shows a placeholder while the download
+runs; the widget's properties panel shows progress and a "Re-download" button. Videos that are no
+longer referenced by any layout are deleted automatically. yt-dlp updates itself daily because
+YouTube changes frequently; if downloads start failing, run `sudo /opt/pimarquee/scripts/update.sh`.
+If YouTube answers "Sign in to confirm you're not a bot" (it does this for some networks), export your
+browser's YouTube cookies in Netscape format (see the yt-dlp wiki) to
+`/var/lib/pimarquee/yt-cookies.txt`, readable by the `pimarquee` user; downloads pick the file up
+automatically.
+
+**Embed** mode uses YouTube's privacy-enhanced iframe player instead. It needs no login either, but
+YouTube may insert ads on monetised videos and the loop restarts with a short black gap.
+
+Each playing video is a software decode on the Pi, like a camera stream: keep to one or two at a time
+on a Pi 4.
 
 ## Home Assistant
 

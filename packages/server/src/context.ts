@@ -6,6 +6,7 @@ import type { Go2rtcClient } from './go2rtc/client.js';
 import type { Go2rtcSync } from './go2rtc/sync.js';
 import type { SessionStore } from './auth/plugin.js';
 import type { WsHub } from './ws/hub.js';
+import type { MediaManager } from './media/youtube.js';
 import { collectMetrics } from './system/metrics.js';
 import { setDisplayPower } from './system/display-power.js';
 import { restartService } from './system/services.js';
@@ -24,11 +25,18 @@ export class AppContext {
     public readonly go2rtc: Go2rtcClient,
     public readonly go2rtcSync: Go2rtcSync,
     public readonly sessions: SessionStore,
+    public readonly media: MediaManager,
     public readonly log: FastifyBaseLogger,
   ) {}
 
   resolved(layoutId?: string | null): ResolvedLayout {
-    return buildResolvedLayout(this.store.config, this.pi, this.store.rev, layoutId === undefined ? undefined : layoutId);
+    return buildResolvedLayout(
+      this.store.config,
+      this.pi,
+      this.store.rev,
+      layoutId === undefined ? undefined : layoutId,
+      (videoId) => this.media.status(videoId),
+    );
   }
 
   /** Push the current active layout to every connected display. */

@@ -55,8 +55,21 @@ Geometry is in **percent of the screen** (`rect: {x,y,w,h}`, 0–100). Common fi
 - `webpage`: `url, refreshIntervalSec|null, stripFrameHeaders, zoom, allowScripts`
 - `text`: `content, fontFamily, fontSize (% of screen height), color, align, valign, bold, italic, padding`
 - `clock`: `showTime, showDate, showSeconds, hour12, dateFormat (long|short|numeric), timezone|null, locale|null, fontFamily, fontSize, color, align`
+- `youtube`: `url, mode (download|embed), loop, muted, fit (cover|contain), maxHeight (360|480|720|1080), startSec`. In the resolved layout the widget also carries `videoId` and `media` (download state, see below).
 
 The authoritative definitions are the zod schemas in `packages/shared/src/schema/config.ts`.
+
+## Media (YouTube downloads)
+
+| Method | Path | Body / notes |
+|---|---|---|
+| GET | `/api/v1/media` | `[{videoId, status (pending|downloading|ready|error|unavailable), src, title, bytes, error, updatedAt}]` |
+| POST | `/api/v1/media/:videoId/refresh` | delete and re-download that video |
+| GET | `/media/<videoId>.mp4` | the downloaded file (supports Range requests) |
+
+Downloads are driven by the layouts: saving a layout with a `youtube` widget in `download` mode
+queues the video; removing the last reference deletes the file. A `config.changed` WebSocket message
+with scope `media` is sent whenever a download state changes.
 
 ## Cameras
 

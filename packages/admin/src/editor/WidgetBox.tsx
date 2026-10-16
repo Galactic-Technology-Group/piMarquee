@@ -3,7 +3,7 @@ import type { Widget } from '@pimarquee/shared';
 import { useEditor } from '../store';
 import { clampRect, snapRect } from './snap';
 
-const ICON: Record<Widget['type'], string> = { camera: '📷', webpage: '🌐', text: '🅣', clock: '🕒' };
+const ICON: Record<Widget['type'], string> = { camera: '📷', webpage: '🌐', text: '🅣', clock: '🕒', youtube: '▶' };
 
 function preview(w: Widget): string {
   switch (w.type) {
@@ -15,6 +15,8 @@ function preview(w: Widget): string {
       return w.content.slice(0, 60) || 'Text';
     case 'clock':
       return '12:34';
+    case 'youtube':
+      return (w.url || 'YouTube video').replace(/^https?:\/\/(www\.)?/, '').slice(0, 40);
   }
 }
 

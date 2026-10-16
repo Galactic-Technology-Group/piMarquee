@@ -15,6 +15,8 @@ import { registerDisplayRoutes } from './routes/display.js';
 import { registerSettingsRoutes } from './routes/settings.js';
 import { registerAuthRoutes } from './routes/auth.js';
 import { registerProxyRoutes } from './routes/proxy.js';
+import { registerMediaRoutes } from './routes/media.js';
+import { MediaManager } from './media/youtube.js';
 import { registerStaticRoutes } from './routes/static.js';
 import { HttpError } from './routes/util.js';
 import { MqttPublisher } from './mqtt/publisher.js';
@@ -41,7 +43,9 @@ async function main(): Promise<void> {
   const hub = new WsHub((client) => {
     if (client.role === 'display') ctx.pushResolved();
   });
-  const ctx = new AppContext(store, pi, hub, go2rtc, go2rtcSync, sessions, app.log);
+  const media = new MediaManager(env.mediaDir, env.ytdlpBin, env.ytdlpExtraArgs, app.log);
+  await media.init();
+  const ctx = new AppContext(store, pi, hub, go2rtc, go2rtcSync, sessions, media, app.log);
   const mqttPub = new MqttPublisher(ctx);
 
   await app.register(cookie);
@@ -66,6 +70,7 @@ async function main(): Promise<void> {
   registerSettingsRoutes(app, ctx);
   registerAuthRoutes(app, ctx);
   registerProxyRoutes(app, ctx);
+  await registerMediaRoutes(app, ctx);
 
   app.get<{ Querystring: { role?: string } }>('/ws', { websocket: true }, (socket, req) => {
     const role = req.query.role === 'display' ? 'display' : 'admin';
@@ -83,11 +88,20 @@ async function main(): Promise<void> {
     if (change.scope === 'cameras' || change.scope === 'all') {
       void go2rtcSync.apply(change.config.cameras).catch((err) => app.log.warn({ err }, 'go2rtc sync failed'));
     }
+    if (change.scope === 'layouts' || change.scope === 'all') {
+      void media.sync(change.config).catch((err) => app.log.warn({ err }, 'media sync failed'));
+    }
     if (change.scope === 'settings' || change.scope === 'all') {
       void mqttPub.reconfigure().catch((err) => app.log.warn({ err }, 'mqtt reconfigure failed'));
     } else {
       mqttPub.onConfigChanged(change.scope);
     }
+  });
+
+  // A download finishing (or failing) changes what the display should show.
+  media.on('change', () => {
+    ctx.pushResolved();
+    hub.broadcast({ type: 'config.changed', rev: store.rev, scope: 'media' }, 'admin');
   });
 
   // --- periodic status to admins ----------------------------------------------
@@ -103,6 +117,8 @@ async function main(): Promise<void> {
   await ctx.refreshGo2rtc();
   void go2rtcSync.apply(store.config.cameras).catch((err) => app.log.warn({ err }, 'initial go2rtc sync failed'));
   void mqttPub.reconfigure().catch((err) => app.log.warn({ err }, 'mqtt start failed'));
+  void media.sync(store.config).catch((err) => app.log.warn({ err }, 'initial media sync failed'));
+  if (!env.noSystem) media.startSelfUpdate();
   startMdns(store.config.settings.displayName, port);
 
   // Restore the persisted power state on boot (e.g. display was off before a reboot).
@@ -112,6 +128,7 @@ async function main(): Promise<void> {
     app.log.info({ signal }, 'shutting down');
     clearInterval(statusTimer);
     go2rtcSync.stop();
+    media.stop();
     hub.close();
     await Promise.allSettled([mqttPub.stop(), stopMdns(), app.close()]);
     process.exit(0);

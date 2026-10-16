@@ -4,6 +4,7 @@ import { CameraWidget } from './widgets/CameraWidget';
 import { WebpageWidget } from './widgets/WebpageWidget';
 import { TextWidget } from './widgets/TextWidget';
 import { ClockWidget } from './widgets/ClockWidget';
+import { YoutubeWidget } from './widgets/YoutubeWidget';
 
 type Layout = NonNullable<ResolvedLayout['layout']>;
 
@@ -17,6 +18,8 @@ function renderWidget(w: ResolvedWidget, timezone: string, locale: string) {
       return <TextWidget widget={w} />;
     case 'clock':
       return <ClockWidget widget={w} defaultTimezone={timezone} defaultLocale={locale} />;
+    case 'youtube':
+      return <YoutubeWidget widget={w} />;
   }
 }
 

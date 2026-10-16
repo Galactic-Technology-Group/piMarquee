@@ -25,4 +25,10 @@ export const env = {
   /** Set to "1" to disable the sudo/systemctl integration (dev machines). */
   noSystem: process.env.PIMARQUEE_NO_SYSTEM === '1' || process.platform !== 'linux',
   logLevel: process.env.LOG_LEVEL ?? 'info',
+  /** Where downloaded YouTube videos live; served at /media/. */
+  mediaDir: process.env.MEDIA_DIR ?? path.join(path.dirname(process.env.CONFIG_PATH ?? path.join(REPO_ROOT, '.dev', 'config.json')), 'media'),
+  /** yt-dlp executable (self-updating standalone binary on the Pi). */
+  ytdlpBin: process.env.YTDLP_BIN ?? 'yt-dlp',
+  /** Extra yt-dlp arguments, whitespace separated (e.g. a different JS runtime or a proxy). */
+  ytdlpExtraArgs: (process.env.YTDLP_EXTRA_ARGS ?? '--js-runtimes node').split(/\s+/).filter(Boolean),
 };

@@ -98,15 +98,35 @@ export const ClockWidgetSchema = WidgetBaseSchema.extend({
 }).strict();
 export type ClockWidget = z.infer<typeof ClockWidgetSchema>;
 
+export const YoutubeWidgetSchema = WidgetBaseSchema.extend({
+  type: z.literal('youtube'),
+  /** Full YouTube URL (watch, youtu.be, shorts, embed) or a bare 11-character video id. */
+  url: z.string().min(1).max(512),
+  /**
+   * download: the server fetches the video once with yt-dlp and the display plays the local file
+   *           (no ads, no login, loops seamlessly, works offline).
+   * embed:    YouTube's privacy-enhanced iframe player (no login; YouTube may still insert ads).
+   */
+  mode: z.enum(['download', 'embed']).default('download'),
+  loop: z.boolean().default(true),
+  muted: z.boolean().default(true),
+  fit: z.enum(['cover', 'contain']).default('contain'),
+  /** Download mode only: highest resolution to fetch. 720 is the sweet spot for a Pi 4. */
+  maxHeight: z.union([z.literal(360), z.literal(480), z.literal(720), z.literal(1080)]).default(720),
+  startSec: z.number().int().min(0).default(0),
+}).strict();
+export type YoutubeWidget = z.infer<typeof YoutubeWidgetSchema>;
+
 export const WidgetSchema = z.discriminatedUnion('type', [
   CameraWidgetSchema,
   WebpageWidgetSchema,
   TextWidgetSchema,
   ClockWidgetSchema,
+  YoutubeWidgetSchema,
 ]);
 export type Widget = z.infer<typeof WidgetSchema>;
 export type WidgetType = Widget['type'];
-export const WIDGET_TYPES: WidgetType[] = ['camera', 'webpage', 'text', 'clock'];
+export const WIDGET_TYPES: WidgetType[] = ['camera', 'webpage', 'text', 'clock', 'youtube'];
 
 export const LayoutObjectSchema = z
   .object({

@@ -29,6 +29,11 @@ install -m 0755 "$APP_DIR/scripts/wait-for-http.sh" /usr/local/bin/pimarquee-wai
 install -m 0440 "$APP_DIR/systemd/pimarquee-sudoers" /etc/sudoers.d/pimarquee
 install -o "$APP_USER" -g "$APP_USER" -m 0644 "$APP_DIR/go2rtc/go2rtc.template.yaml" /etc/go2rtc/go2rtc.template.yaml
 
+# Keep yt-dlp current (YouTube widget); the standalone binary updates itself in place.
+if [[ -x /var/lib/pimarquee/bin/yt-dlp ]]; then
+  sudo -u "$APP_USER" /var/lib/pimarquee/bin/yt-dlp -U || true
+fi
+
 systemctl daemon-reload
 systemctl restart go2rtc.service pimarquee.service
 systemctl start pimarquee-kiosk.service
