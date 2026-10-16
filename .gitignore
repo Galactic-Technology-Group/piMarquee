@@ -8,3 +8,4 @@ config/config.json.bak
 go2rtc/go2rtc.exe
 go2rtc/go2rtc
 go2rtc/*.zip
+*.tsbuildinfo

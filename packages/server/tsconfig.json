@@ -6,9 +6,9 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "sourceMap": true,
+    "incremental": false,
     "types": ["node"],
     "lib": ["ES2022"]
   },
-  "include": ["src"],
-  "references": [{ "path": "../shared" }]
+  "include": ["src"]
 }
